@@ -1,0 +1,14 @@
+{
+  "name": "rihla-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpenAPI contracts for the Rihla platform and generated typed clients",
+  "scripts": {
+    "validate": "redocly lint openapi.yaml",
+    "generate-client": "node node_modules/openapi-typescript-codegen/bin/index.js --input openapi.yaml --output generated/client --client fetch --name RihlaClient"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^1.25.0",
+    "openapi-typescript-codegen": "^0.29.0"
+  }
+}
