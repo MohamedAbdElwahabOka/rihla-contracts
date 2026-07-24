@@ -1,0 +1,115 @@
+openapi: 3.1.0
+info:
+  title: Rihla API Contract
+  description: >
+    Shared OpenAPI contract for the Rihla backend (rihla-api), consumed by
+    rihla-mobile, rihla-vendor-web, and rihla-admin-web via generated typed
+    clients. This is Demo 1 scope only: listing creation and retrieval.
+  version: 0.1.0
+servers:
+  - url: https://api.staging.rihla.mokhtalef.ai
+    description: Staging (Render)
+  - url: http://localhost:3000
+    description: Local development
+
+# Auth is explicitly out of scope for Demo 1 (see context.md) — no security
+# schemes defined yet. Revisit when auth/roles are added post-demo.
+security: []
+
+tags:
+  - name: Listings
+    description: Vendor listing management
+
+paths:
+  /v1/listings:
+    post:
+      operationId: createListing
+      summary: Create a listing
+      tags: [Listings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateListingRequest"
+      responses:
+        "201":
+          description: Listing created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    get:
+      operationId: listListings
+      summary: List all listings
+      tags: [Listings]
+      responses:
+        "200":
+          description: Array of listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+
+components:
+  schemas:
+    CreateListingRequest:
+      type: object
+      required: [title, city, price]
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+          minLength: 1
+          example: "Diving trip - Hurghada"
+        city:
+          type: string
+          minLength: 1
+          example: "Hurghada"
+        price:
+          type: number
+          minimum: 0
+          example: 1200
+    Listing:
+      type: object
+      required: [id, title, city, price, createdAt]
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "3f2a1c8e-4b1a-4e2a-9c3d-1a2b3c4d5e6f"
+        title:
+          type: string
+          example: "Diving trip - Hurghada"
+        city:
+          type: string
+          example: "Hurghada"
+        price:
+          type: number
+          example: 1200
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-07-24T10:00:00.000Z"
+    Error:
+      type: object
+      required: [statusCode, message]
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Validation failed"
+  responses:
+    BadRequest:
+      description: Invalid request body
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
