@@ -35,6 +35,16 @@ jobs:
           path: generated/client
           retention-days: 14
 
+      - name: Build API reference docs
+        run: npx @redocly/cli build-docs openapi.yaml -o docs/api-reference.html
+
+      - name: Upload API reference docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rihla-api-reference
+          path: docs/api-reference.html
+          retention-days: 14
+
   breaking-change-check:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -57,41 +67,3 @@ jobs:
         run: |
           git fetch origin ${{ github.base_ref }}
           npx @redocly/cli diff origin/${{ github.base_ref }}:openapi.yaml openapi.yaml || true
-
-  publish-docs:
-    if: github.event_name == 'push' && github.ref_name == 'main'
-    needs: validate-and-generate
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build API docs
-        run: npx @redocly/cli build-docs openapi.yaml -o docs/index.html
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload docs artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
